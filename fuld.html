@@ -2,18 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta property="og:title" content="OCR - Extracted Text from Images | OCR.sarvesh.space">
-    <meta property="og:description" content="Extract text from images using OCR technology. Instantly convert scanned documents, photos, or screenshots into editable text.">
-    <meta property="og:url" content="https://ocr.sarvesh.space">
-    <meta property="og:type" content="website">
-    <meta name="keywords" content="OCR, Recognition, Text, Image, Document, Software, Scanning, Converter, Tool, App, Service, Technology, Processing, Converter, Scanner, Solution, Algorithm, Accuracy, Speed, System, Efficiency, Performance, Integration, Features, Benefits, Functionality, Development, Advancements, Innovations, Updates, Enhancements, Automation, Training, Learning, Models, Evaluation, Metrics, Criteria, Methods, Standards, Validation, Process, Learning, Techniques, Accuracy Improvement, Learning, Extraction, Precision, Interpretation, Conversion">
-    <meta http-equiv="Content-Language" content="en">
-    <meta property="og:image" content="https://ocr.sarvesh.space/bxs--chess.svg">
-
-    <title>Optical Character Recognition</title>
-
+    <title>Folder Upload</title>
+    <style>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -80,6 +71,53 @@
             border: 1px solid #ddd;
             resize: vertical;
         }
+
+    .container {
+      text-align: center;  /* Center the content horizontally */
+    }
+
+    hr {
+      margin: 2px auto;  /* Add some margin for better spacing */
+      animation: line-grow 5s forwards;
+      height: auto;
+    }
+
+    .before {
+      animation: line-grow-reverse 5s forwards;
+    }
+
+    .after {
+      animation: line-shrink 5s forwards;
+    }
+
+    @keyframes line-grow {
+      from { width: 1%; }
+      to { width: 100%; }
+    }
+
+    @keyframes line-grow-reverse {
+      from { width: 100%; }
+      to { width: 1%; }
+    }
+
+    @keyframes line-shrink {
+      from { width: 100%; }
+      to { width: 1%; }
+    }
+
+    span {
+      font-size: 2em;
+      animation: color-change 5s infinite alternate;
+    }
+
+    @keyframes color-change {
+      0% { color: red; }
+      25% { color: orange; }
+      50% { color: yellow; }
+      75% { color: green; }
+      100% { color: blue; }
+    }
+    </style>
     </style>
 </head>
 <body>
@@ -87,45 +125,56 @@
         <h1>Optical Character Recognition Tool</h1>
         <h2>This tool used Google Drive v2 API to perform OCR</h2>
         <h2 class="message"></h2>
-        <span>Select a File</span>
-        <input type="file" class="file">
+        <span>Select Files</span>
+        <input type="file" class="file" multiple> <!-- Use the "multiple" attribute -->
         <button class="btn">Perform OCR</button>
         <hr />
         <span>Result Text</span>
         <textarea class="text"></textarea><p></p>
         <h5>This page is designed by Sarvesh Huddedar and this page is served from CloudFlare.com</h5>
     </div>
+    
     <script>
         let api = "https://script.google.com/macros/s/AKfycbxItbkLb07sV0CExu347Pa_z62OH1tXzhOu7EVvF327wt82cXf6qWT0PSorezP6B3Vi-Q/exec";
         let msg = document.querySelector(".message");
         let file = document.querySelector(".file");
         let btn = document.querySelector(".btn");
         let text = document.querySelector(".text");
-        btn.addEventListener('click',()=>{
-            msg.innerHTML=`Loading..`;
-            let fr = new FileReader();
-            fr.readAsDataURL(file.files[0])
-            fr.onload=()=>{
-                let res = fr.result;
-                let b64 = res.split("base64,")[1];
-                fetch(api,{
-                    method:"POST",
-                    body:JSON.stringify({
-                        file:b64,
-                        type:file.files[0].type,
-                        name:file.files[0].name
-                    })
-                })
-                  .then(res => res.text())
-                  .then(data => {
-                    text.innerHTML=data;
-                    msg.innerHTML=``;
-                  });
+        btn.addEventListener('click', () => {
+            msg.innerHTML = `Loading..`;
+            let files = file.files; // Retrieve all selected files
+            let fileData = [];
+            for (let i = 0; i < files.length; i++) {
+                let fr = new FileReader();
+                fr.readAsDataURL(files[i]);
+                fr.onload = () => {
+                    let res = fr.result;
+                    let b64 = res.split("base64,")[1];
+                    fileData.push({
+                        file: b64,
+                        type: files[i].type,
+                        name: files[i].name
+                    });
+                    if (fileData.length === files.length) {
+                        // When all files are processed, send data to server
+                        sendToServer(fileData);
+                    }
+                }
             }
-        })
-    </script>
-    <br>
-    
-</body>
-</html>
+        });
 
+        function sendToServer(fileData) {
+            fetch(api, {
+                method: "POST",
+                body: JSON.stringify(fileData)
+            })
+            .then(res => res.text())
+            .then(data => {
+                text.innerHTML = text.innerHTML + '\n' + data;
+                msg.innerHTML = ``;
+            });
+        }
+    </script>
+
+=</body>
+</html>
